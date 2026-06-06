@@ -51,14 +51,16 @@ CREATE TABLE IF NOT EXISTS seasons (
         ON UPDATE CASCADE,
 
     -- A league cannot have more than one "current" season at the same time.
-    CONSTRAINT uq_seasons_league_current
-        UNIQUE NULLS NOT DISTINCT (league_id) WHERE is_current = true,
 
     CONSTRAINT chk_seasons_dates CHECK (end_date >= start_date)
 );
 
 COMMENT ON TABLE  seasons IS 'Seasonal editions per league.';
-COMMENT ON COLUMN seasons.is_current IS 'Only one season per league can be current at any time (enforced via partial unique constraint).';
+COMMENT ON COLUMN seasons.is_current IS 'Only one season per league can be current at any time (enforced via partial unique index).';
+
+-- Enforce at most one current season per league (partial unique index)
+CREATE UNIQUE INDEX uq_seasons_league_current
+    ON seasons (league_id) WHERE is_current = true;
 
 CREATE INDEX idx_seasons_league_year
     ON seasons (league_id, year DESC);

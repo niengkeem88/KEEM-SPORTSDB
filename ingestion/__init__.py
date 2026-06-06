@@ -1,1 +1,1 @@
-# ingestion — API-Football v3 data ingestion & synchronisation service
+# ingestion — Scorebat v3 data ingestion & synchronisation service

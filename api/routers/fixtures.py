@@ -140,7 +140,7 @@ async def get_live_fixtures(
     """Return all currently in-play fixtures with live scores and events.
 
     **Caching strategy:** Redis with 30-second TTL. The ``live_engine_polling``
-    worker in the ingestion service updates these rows every 60 s, so 30 s
+    worker in the ingestion service updates these rows every 30 s, so 30 s
     ensures clients never see data older than two ingestion cycles.
     """
     # ── Check Redis ─────────────────────────────────────────────────────

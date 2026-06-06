@@ -1,13 +1,13 @@
 # ⚽ KEEM SportsDB — Global Soccer Data Platform
 
-A production-grade, end-to-end soccer tracking platform built with **PostgreSQL**, **Python (FastAPI)**, and **Kotlin (Jetpack Compose)**. It ingests live match data from the [API-Football v3](https://www.api-football.com/) provider, serves it through a cached REST API, and renders live scores on an Android client.
+A production-grade, end-to-end soccer tracking platform built with **PostgreSQL**, **Python (FastAPI)**, and **Kotlin (Jetpack Compose)**. It ingests live match data from the [Scorebat v3](https://www.scorebat.com/) provider, serves it through a cached REST API, and renders live scores on an Android client.
 
 ## Architecture Overview
 
 ```
 ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│   API-Football   │────▶│  Ingestion       │────▶│  PostgreSQL      │
-│   (v3 external)  │     │  (async workers)  │     │  + Redis cache   │
+│   Scorebat   │────▶│  Ingestion       │────▶│  PostgreSQL      │
+│  (v3 external)        │  (async workers)  │     │  + Redis cache   │
 └──────────────────┘     └──────────────────┘     └──────────────────┘
                                                           │
                                                           ▼
@@ -31,7 +31,7 @@ A production-grade, end-to-end soccer tracking platform built with **PostgreSQL*
 KEEM-SPORTSDB/
 ├── 001_global_soccer_schema.sql    # PostgreSQL DDL (tables, indexes, triggers)
 ├── .env.example                     # Template for environment variables
-├── ingestion/                       # Python data ingestion service
+├── ingestion/                       # Scorebat ingestion service
 │   ├── client.py                    # Async HTTP client with rate limiting
 │   ├── models.py                    # SQLAlchemy ORM models
 │   ├── database.py                  # Upsert engine (ON CONFLICT DO UPDATE)
@@ -131,7 +131,7 @@ Required variables:
 
 | Variable | Description | Default |
 |---|---|---|
-| `API_FOOTBALL_KEY` | Your API-Football subscription key | *(required)* |
+| `SCOREBAT_TOKEN` | Your Scorebat subscription key | *(required)* |
 | `DATABASE_URL` | PostgreSQL connection string | `postgresql+asyncpg://soccer_user:password@localhost:5432/soccerdb` |
 | `REDIS_URL` | Redis connection string | `redis://localhost:6379/0` |
 | `API_PORT` | FastAPI listen port | `8000` |
@@ -143,10 +143,10 @@ Required variables:
 python -m ingestion.main
 ```
 
-The ingestion service starts three concurrent workers:
+The ingestion service starts three workers:
 - **Weekly fixtures** — polls every 24 h to sync the next 7 days of matches
-- **Pre-match lineups** — polls every 45 min, fetches lineups for fixtures about to start
-- **Live engine** — polls every 60 s, updates live scores and overwrites `live_events_cache`
+- **Pre-match lineups** — disabled (Scorebat free tier does not provide lineups)
+- **Live engine** — polls every 30 s, updates live scores and overwrites `live_events_cache`
 
 Press `Ctrl+C` to stop gracefully — all connections are disposed cleanly.
 
@@ -279,8 +279,8 @@ leagues (id PK, name, country, logo_url, type)
 |---|---|---|
 | `Connection refused` on DB start | PostgreSQL not running | `sudo systemctl start postgresql` |
 | `Upsert error: relation "leagues" does not exist` | Schema not applied | Run `psql -f 001_global_soccer_schema.sql` |
-| `401 Unauthorized` from API-Football | Invalid or missing `API_FOOTBALL_KEY` | Check `.env` and verify your API plan |
-| `429 Too Many Requests` | Exceeded rate limit | Lower `API_RATE_LIMIT_RPS` in `.env` to `8.0` |
+| `401 Unauthorized` from Scorebat | Invalid or missing `SCOREBAT_TOKEN` | Check `.env` and verify your Scorebat token |
+| `429 Too Many Requests` | Exceeded rate limit | Lower `API_RATE_LIMIT_RPS` | Requests per second | `0.16` in `.env` to `8.0` |
 | Android app shows empty screen | API base URL incorrect | Update `BuildConfig.API_BASE_URL` for your network |
 | `git push` asks for password | SSH key not configured | Use `ssh -T git@github.com` to verify |
 
@@ -295,4 +295,4 @@ leagues (id PK, name, country, logo_url, type)
 | Ingestion | Python 3.11+, httpx, SQLAlchemy 2.0 (async) |
 | API | FastAPI, uvicorn, Pydantic v2 |
 | Android | Kotlin, Jetpack Compose, Hilt, Retrofit, KotlinX Serialization |
-| Auth | API-Football subscription key (server-side only) |
+| Auth | Scorebat subscription key (server-side only) |

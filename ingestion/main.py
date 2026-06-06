@@ -1,4 +1,4 @@
-"""Async orchestrator entrypoint for the API-Football v3 ingestion service.
+"""Async orchestrator entrypoint for the Scorebat v3 ingestion service.
 
 Launches three concurrent workers:
 
@@ -22,7 +22,7 @@ import sys
 from collections.abc import Awaitable, Callable
 from typing import NoReturn
 
-from ingestion.client import ApiFootballClient
+from ingestion.client import ScorebatClient
 from ingestion.config import settings
 from ingestion.database import AsyncSessionFactory, dispose_db, init_db
 from ingestion.workers import (
@@ -77,8 +77,8 @@ def _register_signals() -> None:
 async def run_periodic(
     name: str,
     interval_s: int,
-    work: Callable[[ApiFootballClient], Awaitable[None]],
-    client: ApiFootballClient,
+    work: Callable[[ScorebatClient], Awaitable[None]],
+    client: ScorebatClient,
 ) -> NoReturn:
     """Execute *work* immediately, then every *interval_s* seconds until shutdown."""
     logger.info("%s worker started (interval=%ds).", name, interval_s)
@@ -112,12 +112,12 @@ async def amain() -> None:
     logger.info("Initialising database...")
     await init_db()
 
-    api_key = settings.api_key
-    if not api_key:
-        logger.error("API_FOOTBALL_KEY not set. Set it in the environment or config.")
+        token = settings.api_key
+        if not token:
+        logger.error("SCOREBAT_TOKEN not set. Set it in the environment or config.")
         sys.exit(1)
 
-    async with ApiFootballClient(api_key) as client:
+        async with ScorebatClient(token) as client:
         logger.info(
             "Starting ingestion service — weekly interval=%ds, "
             "pre-match window=%ds, live poll interval=%ds.",

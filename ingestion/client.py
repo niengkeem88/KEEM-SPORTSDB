@@ -135,11 +135,27 @@ class ScorebatClient:
                 f"Server error [{response.status_code}] {url}"
             )
 
+        # --- Debug: log response info on failure ---
+        content_type = response.headers.get("content-type", "")
+        logger.debug("Scorebat response: %s %s [%s]", response.status_code, content_type, url)
+
         # --- Parse JSON ---
+        if response.status_code == 204 or not response.content:
+            raise ScorebatClientError(f"Empty response ({response.status_code}) from {url}")
+
+        if "application/json" not in content_type and response.status_code >= 400:
+            preview = response.text[:300]
+            raise ScorebatClientError(
+                f"HTTP {response.status_code} (non-JSON) from {url}: {preview}"
+            )
+
         try:
             return response.json()
         except ValueError as exc:
-            raise ScorebatClientError(f"Non-JSON response: {exc}") from exc
+            preview = response.text[:300]
+            raise ScorebatClientError(
+                f"Non-JSON response ({response.status_code}) from {url}: {preview}"
+            ) from exc
 
     # ----------------------------------------------------------------
     # Domain-specific API methods

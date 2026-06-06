@@ -20,7 +20,7 @@ from sqlalchemy import (
     TIMESTAMP,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMPTZ
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -45,10 +45,10 @@ class League(Base):
         String(10), CheckConstraint("type IN ('League', 'Cup')"), nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMPTZ, nullable=False, server_default=func.now()
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMPTZ, nullable=False, server_default=func.now(), onupdate=func.now()
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     seasons = relationship("Season", back_populates="league", passive_deletes=True)
@@ -77,10 +77,10 @@ class Season(Base):
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
     is_current: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMPTZ, nullable=False, server_default=func.now()
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMPTZ, nullable=False, server_default=func.now(), onupdate=func.now()
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     league = relationship("League", back_populates="seasons")
@@ -101,10 +101,10 @@ class Team(Base):
     short_code: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
     logo_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMPTZ, nullable=False, server_default=func.now()
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMPTZ, nullable=False, server_default=func.now(), onupdate=func.now()
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     def __repr__(self) -> str:
@@ -146,7 +146,7 @@ class Fixture(Base):
         nullable=False,
         default="NS",
     )
-    start_time: Mapped[datetime] = mapped_column(TIMESTAMPTZ, nullable=False)
+    start_time: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     home_score: Mapped[Optional[int]] = mapped_column(
         SmallInteger, CheckConstraint("home_score IS NULL OR home_score >= 0"), nullable=True
     )
@@ -155,10 +155,10 @@ class Fixture(Base):
     )
     live_events_cache: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMPTZ, nullable=False, server_default=func.now()
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMPTZ, nullable=False, server_default=func.now(), onupdate=func.now()
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     def __repr__(self) -> str:
@@ -194,10 +194,10 @@ class Standing(Base):
     goals_for: Mapped[int] = mapped_column(SmallInteger, CheckConstraint("goals_for >= 0"), nullable=False, default=0)
     goals_against: Mapped[int] = mapped_column(SmallInteger, CheckConstraint("goals_against >= 0"), nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMPTZ, nullable=False, server_default=func.now()
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMPTZ, nullable=False, server_default=func.now(), onupdate=func.now()
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     season = relationship("Season", back_populates="standings")

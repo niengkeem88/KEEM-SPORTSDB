@@ -112,12 +112,12 @@ async def amain() -> None:
     logger.info("Initialising database...")
     await init_db()
 
-        token = settings.api_key
-        if not token:
+    token = settings.api_key
+    if not token:
         logger.error("SCOREBAT_TOKEN not set. Set it in the environment or config.")
         sys.exit(1)
 
-        async with ScorebatClient(token) as client:
+    async with ScorebatClient(token) as client:
         logger.info(
             "Starting ingestion service — weekly interval=%ds, "
             "pre-match window=%ds, live poll interval=%ds.",

@@ -114,6 +114,10 @@ class ScorebatClient:
 
         url = endpoint.lstrip("/")
 
+        # Log the actual full URL for debugging
+        req = self.client.build_request("GET", url, params=request_params)
+        logger.info("Scorebat request URL: %s", req.url)
+
         try:
             response = await self.client.get(url, params=request_params)
         except httpx.TimeoutException as exc:

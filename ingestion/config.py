@@ -14,7 +14,7 @@ from typing import Final
 class Settings:
     # -- Scorebat API ---------------------------------------------------------
     api_base_url: str = field(
-        default_factory=lambda: os.getenv("SCOREBAT_BASE_URL", "https://www.scorebat.com/v3/api")
+        default_factory=lambda: os.getenv("SCOREBAT_BASE_URL", "https://api.scorebat.com/v3")
     )
     api_key: str = field(
         default_factory=lambda: os.getenv("SCOREBAT_TOKEN", "")

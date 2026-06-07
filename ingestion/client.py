@@ -114,10 +114,6 @@ class ScorebatClient:
 
         url = endpoint.lstrip("/")
 
-        # Log the actual full URL for debugging
-        req = self.client.build_request("GET", url, params=request_params)
-        logger.info("Scorebat request URL: %s", req.url)
-
         try:
             response = await self.client.get(url, params=request_params)
         except httpx.TimeoutException as exc:
@@ -178,7 +174,7 @@ class ScorebatClient:
 
         The response is a JSON array of match objects.
         """
-        params: dict[str, Any] = {}
+        params: dict[str, Any] = {"format": "json"}
         if date_from is not None:
             params["from"] = date_from
         if date_to is not None:
